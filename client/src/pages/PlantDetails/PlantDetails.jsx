@@ -5,7 +5,7 @@ import Button from "../../components/Shared/Button/Button";
 import PurchaseModal from "../../components/Modal/PurchaseModal";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useQuery } from '@tanstack/react-query'
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import LoadingSpinner from "../../components/Shared/LoadingSpinner";
 
@@ -32,8 +32,9 @@ const PlantDetails = () => {
   };
   if (isLoading) return <LoadingSpinner />;
   console.log(plant.data);
-  
-  const { category, description, image, price, name, seller, quantity } = plant.data
+
+  const { category, description, image, price, name, seller, quantity } =
+    plant.data;
   return (
     <Container>
       <Helmet>
@@ -44,26 +45,19 @@ const PlantDetails = () => {
         <div className="flex flex-col gap-6 flex-1">
           <div>
             <div className="w-full overflow-hidden rounded-xl">
-              <img
-              src={image}
-                className={image}
-                alt="header image"
-              />
+              <img src={image} className={image} alt="header image" />
             </div>
           </div>
         </div>
         <div className="md:gap-10 flex-1">
           {/* Plant Info */}
-          <Heading
-            title={name}
-            subtitle={`Category: ${category}`}
-          />
+          <Heading title={name} subtitle={`Category: ${category}`} />
           <hr className="my-6" />
           <div
             className="
           text-lg font-light text-neutral-500"
           >
-           {description}
+            {description}
           </div>
           <hr className="my-6" />
 
@@ -104,12 +98,20 @@ const PlantDetails = () => {
           <div className="flex justify-between">
             <p className="font-bold text-3xl text-gray-500">Price: {price}$</p>
             <div>
-              <Button onClick={()=>setIsOpen(true)} label={quantity>0? 'Purchase': 'Out of stock'} />
+              <Button
+                onClick={() => setIsOpen(true)}
+                label={quantity > 0 ? "Purchase" : "Out of stock"}
+              />
             </div>
           </div>
           <hr className="my-6" />
 
-          <PurchaseModal plant={plant} closeModal={closeModal} isOpen={isOpen} />
+          <PurchaseModal
+            plant={plant}
+            closeModal={closeModal}
+            isOpen={isOpen}
+            refetch={refetch}
+          />
         </div>
       </div>
     </Container>

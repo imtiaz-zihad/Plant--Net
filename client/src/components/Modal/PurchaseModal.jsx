@@ -14,19 +14,20 @@ import { toast } from "react-hot-toast";
 
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 
-const PurchaseModal = ({ closeModal, isOpen, plant }) => {
-  const { category, description, image, price, name, seller, quantity,_id } =
+const PurchaseModal = ({ closeModal, isOpen, plant,refetch }) => {
+  const { category, description, image, price, name, seller, quantity, _id } =
     plant.data;
   // Total Price Calculation
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
   const [totalQuantity, setTotalQuantity] = useState(1);
   const [totalPrice, setTotalPrice] = useState(price);
+
   const [purchaseInfo, setPurchaseInfo] = useState({
-    customer:{
+    customer: {
       name: user?.displayName,
-      email: user?.email, 
-      image: user?.photoURL
+      email: user?.email,
+      image: user?.photoURL,
     },
     plantId: _id,
     price: totalPrice,
@@ -34,7 +35,6 @@ const PurchaseModal = ({ closeModal, isOpen, plant }) => {
     seller: seller?.email,
     address: "",
     status: "pending",
-
   });
 
   const handleQuantity = (value) => {
@@ -49,24 +49,30 @@ const PurchaseModal = ({ closeModal, isOpen, plant }) => {
     setTotalQuantity(value);
     setTotalPrice(price * value);
 
-    setPurchaseInfo(prv =>{
-      return {...prv, price: price * value, quantity: value}
-    })
+    setPurchaseInfo((prv) => {
+      return { ...prv, price: price * value, quantity: value };
+    });
   };
   const handlePurchase = async () => {
     // Purchase Logic
     console.table(purchaseInfo);
 
-    //post request to db  
-    try{
+    //post request to db
+    try {
+      // save data in db
       await axiosSecure.post("/orders", purchaseInfo);
+      // decrease plant quantity in db
+      await axiosSecure.patch(`/plants/quantity/${_id}`, {
+        quantityToUpdate: totalQuantity,
+      });
       toast.success("Order placed successfully");
-    }catch(error){
+      refetch();
+    } catch (error) {
       console.log(error);
-    }finally{
+    } finally {
       closeModal();
     }
-  }
+  };
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-10" onClose={closeModal}>
@@ -142,7 +148,12 @@ const PurchaseModal = ({ closeModal, isOpen, plant }) => {
                     Address
                   </label>
                   <input
-                  onChange={e=>setPurchaseInfo(prv => ({...prv, address: e.target.value}))}
+                    onChange={(e) =>
+                      setPurchaseInfo((prv) => ({
+                        ...prv,
+                        address: e.target.value,
+                      }))
+                    }
                     className="p-2 text-gray-800 border border-lime-300 focus:outline-lime-500 rounded-md bg-white"
                     name="address"
                     id="address"
