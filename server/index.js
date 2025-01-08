@@ -73,6 +73,33 @@ async function run() {
       res.send(result);
     });
 
+    // manager user status
+    app.patch('/users/:email', verifyToken, async (req, res) => {
+      const email = req.params.email
+      const query = { email }
+      const user = await usersCollection.findOne(query)
+      if (!user || user?.status === 'Requested')
+        return res
+          .status(400)
+          .send('You have already requested, wait for some time.')
+
+      const updateDoc = {
+        $set: {
+          status: 'Requested',
+        },
+      }
+      const result = await usersCollection.updateOne(query, updateDoc)
+      console.log(result)
+      res.send(result)
+    })
+
+    //get user role
+    app.get('/users/role/:email', async (req, res) => {
+      const email = req.params.email
+      const result = await usersCollection.findOne({ email })
+      res.send({ role: result?.role })
+    })
+
     //Save a plant data
     app.post("/plants", verifyToken, async (req, res) => {
       const plant = req.body;
@@ -107,13 +134,21 @@ async function run() {
     //manage plant quantity
     app.patch("/plants/quantity/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
-      const { quantityToUpdate } = req.body;
+      const { quantityToUpdate, status } = req.body;
       const query = { _id: new ObjectId(id) };
-      const updateDoc = {
+      let updateDoc = {
         $inc: {
           quantity: -quantityToUpdate,
         },
       };
+
+      if (status === "increase") {
+        updateDoc = {
+          $inc: {
+            quantity: quantityToUpdate,
+          },
+        };
+      }
       const result = await plantsCollection.updateOne(query, updateDoc);
       res.send(result);
     });
@@ -132,7 +167,8 @@ async function run() {
             },
           },
           {
-            $lookup: {   //go to different collection and look for data
+            $lookup: {
+              //go to different collection and look for data
               from: "plants", //collection name
               localField: "plantId", //local data that you want to watch
               foreignField: "_id", // foreign field name of that same data
@@ -143,19 +179,34 @@ async function run() {
             $unwind: "$plants", //unwind lookup results ,return without array
           },
           {
-            $addFields: { //add these field in order object
+            $addFields: {
+              //add these field in order object
               name: "$plants.name",
               image: "$plants.image",
               category: "$plants.category",
             },
           },
           {
-            $project: { //remove plants objects from order objects
+            $project: {
+              //remove plants objects from order objects
               plants: 0,
             },
           },
         ])
         .toArray();
+      res.send(result);
+    });
+
+    //Cancel delete order
+    app.delete("/orders/:id", verifyToken, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const order = await ordersCollection.findOne(query);
+      if (order.status === "Delivered")
+        return res
+          .status(409)
+          .send("Cannot cancel once the product is delivered ");
+      const result = await ordersCollection.deleteOne(query);
       res.send(result);
     });
 
