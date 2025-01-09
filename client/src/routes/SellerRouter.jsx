@@ -1,16 +1,17 @@
 import PropTypes from "prop-types"
 import LoadingSpinner from "../components/Shared/LoadingSpinner"
-import { Navigate, useLocation } from "react-router-dom"
-import useAuth from "../hooks/useAuth"
+import { Navigate} from "react-router-dom"
+
+import useRole from "../hooks/useRole"
 
 
 const SellerRouter = ({children}) => {
+  const [role,isLoading] =useRole();
     
-    const location = useLocation()
   
-    if (loading) return <LoadingSpinner />
-    if (user) return children
-    return <Navigate to='/login' state={{ from: location }} replace='true' />
+    if (isLoading) return <LoadingSpinner />
+    if (role=== 'seller') return children
+    return <Navigate to='/dashboard' replace='true' />
   }
   
   SellerRouter.propTypes = {
