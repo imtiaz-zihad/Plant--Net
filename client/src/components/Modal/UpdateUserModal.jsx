@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import PropTypes from 'prop-types'
 import { Fragment, useState } from 'react'
 import {
@@ -15,8 +16,8 @@ import { BsCheckLg } from 'react-icons/bs'
 import { AiOutlineDown } from 'react-icons/ai'
 const roles = ['customer', 'seller', 'admin']
 
-const UpdateUserModal = ({ setIsOpen, isOpen }) => {
-  const [selected, setSelected] = useState('')
+const UpdateUserModal = ({ setIsOpen, isOpen,role,updateRole }) => {
+  const [selected, setSelected] = useState(role)
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
@@ -109,6 +110,7 @@ const UpdateUserModal = ({ setIsOpen, isOpen }) => {
 
                 <div className='flex mt-2 justify-center gap-5'>
                   <button
+                  onClick={()=> updateRole(selected)}
                     type='button'
                     className='inline-flex justify-center rounded-md border border-transparent bg-green-100 px-4 py-2 text-sm font-medium text-green-900 hover:bg-green-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2'
                   >
