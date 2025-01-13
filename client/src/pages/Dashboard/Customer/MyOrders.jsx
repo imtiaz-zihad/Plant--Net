@@ -15,9 +15,7 @@ const MyOrders = () => {
   } = useQuery({
     queryKey: ["orders", user?.email],
     queryFn: async () => {
-      const data = await axiosSecure(
-        `${import.meta.env.VITE_API_URL}/customer-orders/${user?.email}`
-      );
+      const data = await axiosSecure(`/customer-orders/${user?.email}`);
       return data;
     },
   });
